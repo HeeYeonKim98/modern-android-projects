@@ -9,3 +9,4 @@ data class Todo(var title:String) {
 }
 
 //Todo table 선언
+//Todo table 선

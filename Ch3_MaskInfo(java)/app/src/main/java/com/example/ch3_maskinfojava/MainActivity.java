@@ -2,12 +2,18 @@ package com.example.ch3_maskinfojava;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -18,6 +24,8 @@ import com.example.ch3_maskinfojava.repository.MaskService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,6 +36,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private MainViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,33 +50,32 @@ public class MainActivity extends AppCompatActivity {
         final StoreAdapter adapter = new StoreAdapter();
         recyclerView.setAdapter(adapter);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(MaskService.BASE_URL)
-                .addConverterFactory(MoshiConverterFactory.create())
-                .build();
-
-        MaskService service = retrofit.create(MaskService.class);
-
-        //코드가 아닌, 받아오는 준비를 함
-        Call<StoreInfo> storeInfoCall = service.fetchStoreInfo();
-
-        //동기 방식으로 값을 바로 불러옴 / execute를 실행했으므로 try-catch를 불러오지 않으면 throws로 던짐
-        storeInfoCall.enqueue(new Callback<StoreInfo>() {
-            @Override
-            public void onResponse(Call<StoreInfo> call, Response<StoreInfo> response) {
-                List<Store> items = response.body().getStores();
-                adapter.updateItems(items);
-
-            }
-
-            @Override
-            public void onFailure(Call<StoreInfo> call, Throwable t) {
-                Log.e(TAG, "failure", t);
-            }
+        //ui 변경 감지 후 업데이트
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+        viewModel.itemLiveData.observe(this, stores -> {    //해당 activity 를 관찰
+            adapter.updateItems(stores);
+            getSupportActionBar().setTitle("마스크 재고 있는 곳 : "+stores.size());
         });
 
 
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main_meun, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_refresh:
+                viewModel.FetchStoreInfo();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
 
@@ -98,8 +106,45 @@ class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHolder>{
         holder.tv_name.setText(store.getName());
         holder.tv_addr.setText(store.getAddr());
         holder.tv_dist.setText("1.0km");
-        holder.tv_remain.setText(store.getRemainStat());
-        holder.tv_count.setText("100개");
+
+        String count = "100개 이상";
+        String remainStat = "충분";
+        int color = Color.BLUE;
+
+        switch (store.getRemainStat()){
+            case "planty":
+                count = "100개 이상";
+                remainStat = "충분";
+                color = Color.GREEN;
+                break;
+
+            case "some":
+                count = "30개 이상";
+                remainStat = "여유";
+                color = Color.YELLOW;
+                break;
+
+            case  "few":
+                count="2개 이상";
+                remainStat = "매진 임박";
+                color = Color.RED;
+                break;
+
+            case  "empty":
+                count="1개 이상";
+                remainStat = "매진";
+                color = Color.GRAY;
+                break;
+
+            default:
+
+        }
+        holder.tv_remain.setText(remainStat);
+        holder.tv_count.setText(count);
+        
+        holder.tv_remain.setTextColor(color);
+        holder.tv_count.setTextColor(color);
+
 
     }
 

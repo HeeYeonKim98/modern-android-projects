@@ -2,12 +2,14 @@ package com.example.ch3_maskinfojava;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,32 +18,75 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.ch3_maskinfojava.models.Store;
-import com.example.ch3_maskinfojava.models.StoreInfo;
-import com.example.ch3_maskinfojava.repository.MaskService;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.moshi.MoshiConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private MainViewModel viewModel;
 
+    private FusedLocationProviderClient fusedLocationClient;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                performAction();
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+            }
+
+
+        }; //ㅇㅓ떤 처리를 해놓은건지 정의해 놓은 함수
+        TedPermission.with(this)
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.ACCESS_FINE_LOCATION)
+                .check();
+
+        //
+    }
+
+    @SuppressLint("MissingPermission") //permision 처리 안해서 나오는 에러를 그냥 처리 안해도 에러를 숨기려고 어노테이션 처리됨
+    private void performAction() {
+        fusedLocationClient.getLastLocation()
+                .addOnFailureListener(this,e->{
+                    Log.e(TAG, "performAction: ", e.getCause());
+                })
+                .addOnSuccessListener(this, location -> {
+                    Log.d(TAG,"performAction : "+location);
+                    if (location != null) {
+                        Log.d(TAG,"getLatitude"+location.getLatitude());
+                        Log.d(TAG, "getLongitude"+location.getLongitude());
+
+                        viewModel.location = location;
+                        viewModel.FetchStoreInfo();
+                    }
+                });
+
 
         RecyclerView recyclerView = findViewById(R.id.recyclerview_store);
 
@@ -51,13 +96,19 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         //ui 변경 감지 후 업데이트
-        viewModel = new ViewModelProvider(this).get(MainViewModel.class);
         viewModel.itemLiveData.observe(this, stores -> {    //해당 activity 를 관찰
             adapter.updateItems(stores);
             getSupportActionBar().setTitle("마스크 재고 있는 곳 : "+stores.size());
         });
 
+        viewModel.loadingLiveData.observe(this, isLoading ->{
+            if(isLoading){
+                findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            }else{
+                findViewById(R.id.progressBar).setVisibility(View.GONE);
 
+            }
+        });
     }
 
     @Override
@@ -105,7 +156,7 @@ class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHolder>{
 
         holder.tv_name.setText(store.getName());
         holder.tv_addr.setText(store.getAddr());
-        holder.tv_dist.setText("1.0km");
+        holder.tv_dist.setText(String.format("%.2f km",store.getDistance()));
 
         String count = "100개 이상";
         String remainStat = "충분";

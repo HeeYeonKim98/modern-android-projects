@@ -43,5 +43,6 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
     // LiveData
     implementation "androidx.lifecycle:lifecycle-livedata:$lifecycle_version"
-
+    implementation "com.google.android.gms:play-services-location:17.1.0"
+    implementation 'gun0912.ted:tedpermission:2.2.3'
 }

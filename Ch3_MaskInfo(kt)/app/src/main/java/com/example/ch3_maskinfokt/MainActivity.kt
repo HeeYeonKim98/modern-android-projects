@@ -2,7 +2,9 @@ package com.example.ch3_maskinfokt
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import androidx.activity.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ch3_maskinfokt.model.Store
@@ -25,6 +27,16 @@ class MainActivity : AppCompatActivity() {
                 false
             )
             adapter = storeAdapter
+        }
+        viewModel.apply {
+            itemLiveData.observe(this@MainActivity, Observer {
+                storeAdapter.updateItems(it)
+            })
+
+            loadingLiveData.observe(this@MainActivity, Observer {
+                progressBar.visibility = if(it) View.VISIBLE else View.GONE
+
+            })
         }
 
         //임시 데이터

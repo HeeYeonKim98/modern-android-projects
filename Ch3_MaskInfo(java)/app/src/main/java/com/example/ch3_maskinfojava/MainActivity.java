@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
-        }; //ㅇㅓ떤 처리를 해놓은건지 정의해 놓은 함수
+        }; // 어떤 처리를 해놓은건지 정의해 놓은 함수
         TedPermission.with(this)
                 .setPermissionListener(permissionlistener)
                 .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
         //
     }
 
-    @SuppressLint("MissingPermission") //permision 처리 안해서 나오는 에러를 그냥 처리 안해도 에러를 숨기려고 어노테이션 처리됨
+    @SuppressLint("MissingPermission") // permision 처리 안해서 나오는 에러를 처리 안하고도 빌드될 수 있게 숨기려고 어노테이션 처리됨
     private void performAction() {
         fusedLocationClient.getLastLocation()
                 .addOnFailureListener(this,e->{
@@ -95,8 +95,8 @@ public class MainActivity extends AppCompatActivity {
         final StoreAdapter adapter = new StoreAdapter();
         recyclerView.setAdapter(adapter);
 
-        //ui 변경 감지 후 업데이트
-        viewModel.itemLiveData.observe(this, stores -> {    //해당 activity 를 관찰
+        // ui 변경 감지 후 업데이트
+        viewModel.itemLiveData.observe(this, stores -> {    // 해당 activity 를 관찰
             adapter.updateItems(stores);
             getSupportActionBar().setTitle("마스크 재고 있는 곳 : "+stores.size());
         });
@@ -136,7 +136,7 @@ class StoreAdapter extends RecyclerView.Adapter<StoreAdapter.StoreViewHolder>{
 
     public  void updateItems(List<Store> items){
         mItems=items;
-        notifyDataSetChanged(); //ui 갱
+        notifyDataSetChanged(); //ui 갱신
     }
 
     //뷰홀더를 만드는 부분

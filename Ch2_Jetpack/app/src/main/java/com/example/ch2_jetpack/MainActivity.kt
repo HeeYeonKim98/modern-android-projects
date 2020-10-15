@@ -24,10 +24,10 @@ class MainActivity : AppCompatActivity() {
         binding.viewModel=viewModel
 
 
+        //->databinding을 사용하면 생략가능
 //        viewModel.getAll().observe(this, Observer {
 //            ResultText.text=it.toString()
 //        })
-        //->databinding을 사용하면 생략가능
 
 //        TodoButton.setOnClickListener {
 //            lifecycleScope.launch(Dispatchers.IO){

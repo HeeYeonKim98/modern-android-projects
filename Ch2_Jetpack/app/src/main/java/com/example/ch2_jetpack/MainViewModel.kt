@@ -26,10 +26,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application){
         return db.todoDao().getAll()
     }
 
-//    suspend fun insert(todo:Todo){
-//        db.todoDao().Insert(todo)
-//    }
-
     fun insert(todo:String){
         viewModelScope.launch(Dispatchers.IO) {
             db.todoDao().Insert(Todo(todo))

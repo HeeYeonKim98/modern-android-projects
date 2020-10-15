@@ -17,5 +17,3 @@ interface TodoDao {
     @Delete
     fun Delete(todo: Todo)
 }
-
-//Todo.kt에서 만든 Todo table에 대한 쿼리문을 작성하고, insert;update;delete 기능 선언

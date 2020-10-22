@@ -8,9 +8,11 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ch3_maskinfokt.model.Store
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
 
 //코틀린에서는 var과 null타입을 잘 안쓰려고 한다.
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val viewModel :MainViewModel by viewModels()
 

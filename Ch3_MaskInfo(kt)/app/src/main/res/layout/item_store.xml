@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <data>
+        <variable
+            name="store"
+            type="com.example.ch3_maskinfokt.model.Store" />
+    </data>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,6 +12,7 @@
     android:layout_height="wrap_content">
 
     <TextView
+        android:text="@{store.name}"
         android:id="@+id/textview_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -17,6 +24,7 @@
         tools:text="삼성약국ㄱ" />
 
     <TextView
+        android:text="@{store.addr}"
         android:id="@+id/textview_addr"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,6 +45,8 @@
         tools:text="1.0km" />
 
     <TextView
+        app:remainStat="@{store}"
+        app:color="@{store}"
         android:id="@+id/textview_remain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,6 +57,8 @@
         tools:text="충분" />
 
     <TextView
+        app:count="@{store}"
+        app:color="@{store}"
         android:id="@+id/textview_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -55,4 +67,4 @@
         app:layout_constraintTop_toBottomOf="@+id/textview_remain"
         tools:text="100개 이상" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout></layout>

@@ -1,4 +1,5 @@
 # modern-android-projects
+Jetpack을 활용한 mask information application
 
 ### <br/>
 ###
